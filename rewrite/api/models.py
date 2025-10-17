@@ -62,6 +62,46 @@ class Permission(models.Model):
 
     def __str__(self):
         return f"{self.user.nickname}: {self.permission}"
+    
+    @staticmethod
+    def is_valid_community_permission(community_slug: str, permission: str) -> bool:
+        """
+        Check if a permission is valid for a community.
+        Prevents granting of invalid permissions via direct API requests.
+        
+        Valid community permissions:
+        - community.{slug}.leader
+        - community.{slug}.recruitment
+        
+        Args:
+            community_slug: Slug of the community
+            permission: Permission string to validate
+        
+        Returns:
+            bool: Whether the permission is valid
+        """
+        perm = permission.lower()
+        return perm == f'community.{community_slug}.leader' or perm == f'community.{community_slug}.recruitment'
+    
+    @staticmethod
+    def is_valid_mission_permission(mission_slug: str, permission: str) -> bool:
+        """
+        Check if a permission is valid for a mission.
+        Prevents granting of invalid permissions via direct API requests.
+        
+        Valid mission permissions:
+        - mission.{slug}.editor
+        - mission.{slug}.slotlist.community
+        
+        Args:
+            mission_slug: Slug of the mission
+            permission: Permission string to validate
+        
+        Returns:
+            bool: Whether the permission is valid
+        """
+        perm = permission.lower()
+        return perm == f'mission.{mission_slug}.editor' or perm == f'mission.{mission_slug}.slotlist.community'
 
 
 class Mission(models.Model):
