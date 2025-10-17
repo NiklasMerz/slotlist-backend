@@ -10,7 +10,7 @@ The original backend was built with:
 - **Authentication**: JWT with Steam SSO
 
 The new backend is built with:
-- **Framework**: Django 4.2 with Django Ninja
+- **Framework**: Django 5.2 with Django Ninja
 - **Database**: PostgreSQL with Django ORM
 - **Authentication**: JWT with Steam SSO
 
