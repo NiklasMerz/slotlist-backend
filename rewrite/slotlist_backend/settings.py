@@ -143,7 +143,11 @@ JWT_SECRET = os.getenv('CONFIG_JWT_SECRET', 'change-me-in-production')
 JWT_ALGORITHM = 'HS256'
 JWT_ISSUER = os.getenv('CONFIG_JWT_ISSUER', 'slotlist.info')
 JWT_AUDIENCE = os.getenv('CONFIG_JWT_AUDIENCE', 'slotlist.info')
-JWT_EXPIRES_IN = int(os.getenv('CONFIG_JWT_EXPIRESIN', '86400'))  # 24 hours in seconds
+# 24 hours in seconds (default)
+try:
+    JWT_EXPIRES_IN = int(os.getenv('CONFIG_JWT_EXPIRESIN', '86400'))
+except (ValueError, TypeError):
+    JWT_EXPIRES_IN = 86400
 
 # Steam API
 STEAM_API_SECRET = os.getenv('CONFIG_STEAM_API_SECRET', '')
