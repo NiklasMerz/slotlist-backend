@@ -73,11 +73,13 @@ DEFAULT_ADMIN_NICKNAME=your-nickname
 SENTRY_DSN=your-sentry-dsn
 ```
 
-4. Run migrations:
-```bash
-python manage.py makemigrations
-python manage.py migrate
-```
+4. **Important - Database Setup:**
+
+   **Using Existing Database:**
+   If you have an existing slotlist database, you can use it directly. The Django models are configured with `managed = False` which means Django will NOT create, modify, or delete database tables. Simply configure your database connection in `.env` and skip to step 6.
+
+   **Creating New Database:**
+   If you need to create a new database from scratch, you'll need to set up the schema manually or import from a backup. The models are marked as unmanaged to preserve compatibility with the original TypeScript backend's database schema.
 
 5. Create a superuser (optional):
 ```bash
@@ -206,11 +208,14 @@ The Django backend includes the following models:
 
 **Important:** The Django models are configured to use the **exact same database schema** as the original TypeScript/Sequelize implementation. All models use `db_column` attributes to map to the original camelCase database column names (e.g., `createdAt`, `updatedAt`, `communityUid`, etc.).
 
-This means you can:
+**Unmanaged Models:** All models have `managed = False` in their Meta class. This tells Django to NOT create, modify, or delete these database tables through migrations. This ensures:
 - **Drop-in replacement**: Point Django to your existing PostgreSQL database
 - **No migration needed**: The Django ORM will work with the existing schema
 - **Data preservation**: All existing data remains intact
 - **Zero downtime**: Switch between TypeScript and Django backends without schema changes
+- **Schema safety**: Django won't accidentally modify your production database structure
+
+**Note:** If you need to create a new database from scratch, you'll need to set up the schema manually (e.g., using SQL scripts or importing from a backup) since Django migrations are disabled for these models.
 
 ## Production Deployment
 
@@ -230,11 +235,15 @@ gunicorn slotlist_backend.wsgi:application
 
 ## Migration from Original Backend
 
-The database schema is designed to be compatible with the existing PostgreSQL database. To migrate:
+The Django backend is designed to work with your existing PostgreSQL database without any schema changes:
 
-1. Ensure the database connection settings match your existing database
-2. Run Django migrations to create any missing tables/columns
-3. The existing data should remain intact
+1. **Configure Database Connection**: Update `.env` with your existing database credentials
+2. **No Migrations Needed**: All models are marked as `managed = False`, so Django won't modify the schema
+3. **Verify Connection**: Run `python manage.py check` to ensure Django can connect
+4. **Test Read Access**: Use Django admin at `/admin/` to verify data is readable
+5. **Switch Backends**: You can safely switch between the TypeScript and Django backends - they use the same database schema
+
+**Important:** The models are configured as unmanaged to preserve your existing database structure. If you need to make schema changes, you'll need to do so manually via SQL or by temporarily enabling management for specific models.
 
 ## Development
 
@@ -250,7 +259,7 @@ python manage.py migrate
 ```
 
 ### Django Admin
-The Django admin interface is available at `http://localhost:8000/admin/`
+The Django admin interface is available at `http://localhost:8000/admin/` with full access to all models for easy data management.
 
 ## Architecture
 
