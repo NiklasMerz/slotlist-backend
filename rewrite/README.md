@@ -147,6 +147,16 @@ The Django backend includes the following models:
 10. **CommunityApplication** - Applications to join communities
 11. **Notification** - User notifications
 
+### Database Schema Compatibility
+
+**Important:** The Django models are configured to use the **exact same database schema** as the original TypeScript/Sequelize implementation. All models use `db_column` attributes to map to the original camelCase database column names (e.g., `createdAt`, `updatedAt`, `communityUid`, etc.).
+
+This means you can:
+- **Drop-in replacement**: Point Django to your existing PostgreSQL database
+- **No migration needed**: The Django ORM will work with the existing schema
+- **Data preservation**: All existing data remains intact
+- **Zero downtime**: Switch between TypeScript and Django backends without schema changes
+
 ## Production Deployment
 
 For production deployment:
