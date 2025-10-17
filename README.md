@@ -1,106 +1,188 @@
-# slotlist-backend
-Backend of [slotlist.info](https://slotlist.info), an ArmA 3 mission planning and slotlist management tool.  
-The corresponding frontend implementation of this project can be found at [slotlist-frontend](https://github.com/MorpheusXAUT/slotlist-frontend).
+# Slotlist Backend - Monorepo
 
-## 📢 Project Status: Discontinued
+This repository contains both the legacy TypeScript/Hapi.js backend and the new Django/Django Ninja backend for slotlist.info.
 
-After nearly a decade of serving the ArmA community, slotlist.info will be shut down on 31 December 2025. The project is no longer actively maintained due to time and resource constraints, and its underlying technology stack has become outdated. This repository remains available as an archive for historical and reference purposes. Thank you to everyone who contributed and supported the project over the years!
+## Repository Structure
 
-## Installation
-### Requirements
-* [Node](https://nodejs.org) 8.1 and up
-* [Yarn](https://yarnpkg.com) 1.4 and up
-* [PostgreSQL](https://www.postgresql.org/) 9.6 and up
-
-#### Package requirements
-* libpq
-* g++ *(build only)*
-* make *(build only)*
-* postgresql-dev *(build only)*
-* python2 *(build only)*
-
-#### Optional dependencies
-* [Docker](https://www.docker.com/) 17.12 and up
-* [Docker Compose](https://docs.docker.com/compose/) 1.14 and up
-* [Kubernetes](https://kubernetes.io/) 1.7 and up
-
-### Setup
-#### Install and transpile TypeScript
-```sh
-$ yarn
-$ yarn build
+```
+slotlist-backend/
+├── legacy/              # Original TypeScript/Hapi.js backend (Node.js)
+│   ├── src/            # TypeScript source code
+│   ├── package.json    # Node.js dependencies
+│   └── ...             # Legacy configuration files
+│
+├── rewrite/            # New Django/Django Ninja backend (Python)
+│   ├── api/            # Django application
+│   ├── manage.py       # Django management script
+│   ├── requirements.txt # Python dependencies
+│   ├── docker-compose.yml # Docker setup for Django + PostgreSQL
+│   └── ...             # Django configuration files
+│
+└── README.md           # This file
 ```
 
-#### Prepare database and migrate to latest state
-```sh
-$ yarn migrate
+## Quick Start
+
+### Django Backend (Recommended)
+
+The new Django backend is located in the `rewrite/` directory.
+
+```bash
+cd rewrite
+docker-compose up
 ```
 
-#### Remove unneeded packages for minimal production install (optional)
-```sh
-$ yarn install --prod
-$ yarn cache clean
+The API will be available at http://localhost:8000/api/
+
+**Documentation:**
+- Full setup guide: [rewrite/README.md](rewrite/README.md)
+- Steam OAuth guide: [rewrite/STEAM_OAUTH.md](rewrite/STEAM_OAUTH.md)
+- Database schema: [rewrite/DATABASE_SCHEMA.md](rewrite/DATABASE_SCHEMA.md)
+
+### Legacy Backend (TypeScript/Hapi.js)
+
+The original TypeScript backend is in the `legacy/` directory for reference.
+
+```bash
+cd legacy
+yarn install
+yarn dev
 ```
 
-#### Adjust required environment variables and config
-Configuration will be parsed from environment variables, all of which can be found in the `dev.env` file as well as the [Configuration](docs/Configuration.md) markdown file in the `docs/` folder of this repository.
+**Note:** The legacy backend is maintained for reference but the Django backend is recommended for new deployments.
 
-Beside `dev.env`, you should create a `.env` file in the root of your repository - it will automatically be ignored by git. Use this file to overwrite the default config values or provide missing ones; you will at very least have to provide:
-* CONFIG_STEAM_API_SECRET
-* CONFIG_STORAGE_BUCKETNAME
-* CONFIG_STORAGE_PROJECTID
-* CONFIG_JWT_SECRET
-* DEFAULT_ADMIN_STEAMID
-* DEFAULT_ADMIN_NICKNAME
+## Features Comparison
 
-If you do not use Docker Compose to run slotlist-backend, make sure all environment variables are set up as listed in `dev.env`.
+| Feature | Legacy (TypeScript) | Django Rewrite |
+|---------|-------------------|----------------|
+| Framework | Hapi.js | Django + Django Ninja |
+| Language | TypeScript | Python 3.9+ |
+| ORM | Sequelize | Django ORM |
+| API Docs | Swagger (hapi-swagger) | OpenAPI (Django Ninja) |
+| Authentication | JWT + Steam OpenID | JWT + Steam OpenID |
+| Database | PostgreSQL | PostgreSQL |
+| Database Schema | Original | 100% Compatible |
+| Docker Support | ✅ | ✅ |
+| Version | 1.2.x | 1.0.0 (rewrite) |
 
-## Usage
-slotlist-backend can either be run "natively" or utilising Docker and Docker Compose.  
-When using the Docker Compose startup, a PostgreSQL instance will automatically be started as well, removing the need to provide a separate database setup.
+## Migration Guide
 
-#### Start with bunyan formatting
-```sh
-$ yarn start
-```
+The Django backend is designed as a **drop-in replacement** for the TypeScript backend:
 
-#### Start with raw bunyan JSON logs
-```sh
-$ yarn start:docker
-```
+1. Both backends use the **same database schema**
+2. Both backends use the **same authentication flow**
+3. Both backends expose **compatible API endpoints**
 
-#### Start using Docker
-```sh
-$ docker-compose up
-```
+To migrate:
+1. Point the Django backend to your existing PostgreSQL database
+2. Configure Steam API key
+3. Test endpoints with your frontend
+4. Switch traffic to Django backend
+
+See [rewrite/DATABASE_SCHEMA.md](rewrite/DATABASE_SCHEMA.md) for detailed compatibility information.
 
 ## Development
-The easiest way to start developing is by using the Docker setup as described above. Running `docker-compose up` automatically mounts the transpiled `dist/` folder to the Docker container and watches for file changes - you can thus run a build task in your IDE and the backend container will automatically restart with the latest changes.
 
-Unfortunately, there is no automated unit tests as of now (2018-01-09), however I plan on adding some mocha tests in the future, removing the need to test all new and existing functionality by hand.
+### Django Backend
+
+```bash
+cd rewrite
+
+# Using Docker (Recommended)
+docker-compose up
+
+# Or manually
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver
+```
+
+### Legacy Backend
+
+```bash
+cd legacy
+
+# Install dependencies
+yarn install
+
+# Development
+yarn dev
+
+# Production
+yarn build
+yarn start
+```
+
+## API Documentation
+
+### Django Backend
+- Interactive API docs: http://localhost:8000/api/docs
+- ReDoc: http://localhost:8000/api/redoc
+- OpenAPI schema: http://localhost:8000/api/openapi.json
+
+### Legacy Backend
+- Swagger UI: http://localhost:3000/documentation
+
+## Configuration
+
+### Django Backend
+Configuration via environment variables (`.env` file):
+- Database credentials
+- JWT secrets
+- Steam API key
+- Debug settings
+
+See [rewrite/.env.example](rewrite/.env.example) for all options.
+
+### Legacy Backend
+Configuration via environment variables:
+- `DB_*` - Database settings
+- `CONFIG_JWT_*` - JWT configuration
+- `CONFIG_STEAM_*` - Steam API settings
+
+See [legacy/dev.env](legacy/dev.env) for all options.
+
+## Testing
+
+### Django Backend
+```bash
+cd rewrite
+python manage.py test
+```
+
+### Legacy Backend
+```bash
+cd legacy
+yarn test
+```
 
 ## Deployment
-slotlist-backend was designed to be deployed to a Kubernetes cluster running on the [Google Cloud Platform](https://cloud.google.com/). The `k8s/` folder contains the configuration files required to create and run all backend as well as other miscellaneous service and infrastructure. A `cloudbuild.yaml` file for automatic Docker image builds is provided in the repository root as well.
 
-Generally speaking, slotlist-backend can be deployed anywhere running Node 8.1 or up and only depends on a PostgreSQL database.
+### Django Backend with Docker
 
-Since no direct SSL support is integrated, we advise you to run the backend instance behind a reverse proxy such as [nginx](https://www.nginx.com/) or [traefik](https://traefik.io/) and handle SSL offloading there. [Let's Encrypt](https://letsencrypt.org/) provides excellent, free SSL certificates that are easy to integrate into your existing hosting, so there's no reason why you should run your site over plain HTTP!
+```bash
+cd rewrite
+docker-compose up -d
+```
 
-Please be advised that some configuration values might need modifications should you plan to run your own instance since they have been tailored to work for [slotlist.info](https://slotlist.info)'s main instance. This is especially relevant for the CSP/HPKP headers set - failing to set these properly will result in problems loading your site.
+For production deployment, see [rewrite/README.md](rewrite/README.md).
+
+### Legacy Backend
+
+See legacy backend documentation for deployment instructions.
 
 ## Contributing
-Pull requests are more than welcome - I am grateful for any help, no matter how small it is! For major changes, please open an issue first so proposed modifications can be discussed first.
 
-All pull requests should be submitted to the `dev` branch - once a feature is fully implemented and tested, it will be merged to the `master` branch and deployed.  
-Attributions will be provided in the [Contributors](docs/Contributors.md) file inside the `docs/` folder as appropriate.
-
-In additional to development work for the backend or frontend projects, [slotlist.info](https://slotlist.info) also needs your help in providing accurate and complete translations. We are utilising [OneSky](https://morpheusxaut.oneskyapp.com/collaboration/project/133324) to crowd-source our translations and provide an easy interface to manage required strings. Feel free to contribute any translations or suggest a new language by opening an issue on the [slotlist-frontend repository](https://github.com/MorpheusXAUT/slotlist-frontend/issues).
-
-## Versioning
-slotlist-backend uses [Semantic Versioning](https://semver.org/) for releases, every deployment will be tagged with a new, appropriate version - old releases can be found on GitHub's [release tab](https://github.com/MorpheusXAUT/slotlist-backend/releases).
+New features should be added to the Django backend in the `rewrite/` directory. The legacy backend is in maintenance mode.
 
 ## License
-[MIT](https://choosealicense.com/licenses/mit/)
 
-## See Also
-[slotlist-frontend](https://github.com/MorpheusXAUT/slotlist-frontend), the frontend portion of [slotlist.info](https://slotlist.info), written in Vue.js
+See [LICENSE](LICENSE) file for details.
+
+## Support
+
+For issues and questions:
+- Django backend: Create an issue with `[Django]` prefix
+- Legacy backend: Create an issue with `[Legacy]` prefix

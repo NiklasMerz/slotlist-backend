@@ -26,8 +26,12 @@ services:
       - DB_PASSWORD=postgres
       - DB_HOST=db
       - DB_PORT=5432
-      - CONFIG_JWT_SECRET=development-secret-key
-      - DJANGO_SECRET_KEY=development-django-secret
+      - CONFIG_JWT_SECRET=development-secret-key-change-in-production
+      - CONFIG_JWT_ISSUER=http://localhost:8000
+      - CONFIG_JWT_AUDIENCE=http://localhost:8000
+      - CONFIG_STEAM_API_SECRET=your-steam-api-key-here
+      - DJANGO_SECRET_KEY=development-django-secret-change-in-production
+      - ALLOWED_HOSTS=*
     depends_on:
       - db
 
