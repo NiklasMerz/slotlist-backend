@@ -20,6 +20,7 @@ The new backend is built with:
 - Python 3.9 or higher
 - PostgreSQL 9.6 or higher
 - Virtual environment (venv)
+- **Steam API Key** (for authentication) - [Get one here](https://steamcommunity.com/dev/apikey)
 
 ### Setup
 
@@ -91,13 +92,24 @@ The API will be available at `http://localhost:8000/api/`
 ## API Documentation
 
 Django Ninja provides automatic API documentation:
-- **Interactive docs**: `http://localhost:8000/api/docs`
+- **Interactive docs (Swagger UI)**: `http://localhost:8000/api/docs`
+- **ReDoc**: `http://localhost:8000/api/redoc`
 - **OpenAPI schema**: `http://localhost:8000/api/openapi.json`
+
+### Steam OAuth Authentication
+
+The backend uses Steam OpenID for user authentication. See **[STEAM_OAUTH.md](STEAM_OAUTH.md)** for complete documentation including:
+- Authentication flow
+- API endpoints (`GET /api/v1/auth/steam`, `POST /api/v1/auth/steam`)
+- Frontend integration examples
+- Configuration guide
+- Troubleshooting
 
 ## API Endpoints
 
 ### Authentication
-- `GET /api/v1/auth/steam/return` - Steam authentication return handler
+- `GET /api/v1/auth/steam` - Get Steam OpenID login URL
+- `POST /api/v1/auth/steam` - Verify Steam login and get JWT token
 - `POST /api/v1/auth/refresh` - Refresh JWT token
 
 ### Status
