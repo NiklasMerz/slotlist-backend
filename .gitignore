@@ -69,3 +69,15 @@ k8s/credentials.json
 k8s/postgres-secrets.yaml
 k8s/traefik-cloudflare.yaml
 k8s/traefik-config.yaml
+
+# Python
+rewrite/venv/
+rewrite/test_venv/
+rewrite/__pycache__/
+rewrite/**/__pycache__/
+rewrite/*.pyc
+rewrite/*.pyo
+rewrite/*.pyd
+rewrite/.Python
+rewrite/db.sqlite3
+rewrite/*.sqlite3
